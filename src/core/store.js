@@ -7,23 +7,29 @@ export default function createStore() {
   const select = (cursor) => (...path) => {
     cursor = cursor.select(path);
 
-    return {
+    const self = {
       select: select(cursor),
 
       observe() {
-        const subject = new Rx.Subject();
-
-        cursor.on('update', () => subject.onNext(cursor.get()));
-
-        return subject;
+        return Rx.Observable.create((observer) => {
+          cursor.on('update', () => observer.onNext(cursor.get()));
+        });
       },
 
       set(key) {
         return (data) => {
-          cursor.set(key, data);
+          if (key) {
+            cursor.set(key, data);
+          } else {
+            cursor.set(data);
+          }
+
+          return self;
         };
       }
     };
+
+    return self;
   };
 
   return select(tree)();

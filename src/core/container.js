@@ -1,5 +1,6 @@
 import React from 'react';
 import Rx from 'rx';
+import merge from 'lodash.merge';
 
 export default function createContainer({ init, view }, connect) {
   const spec = {};
@@ -9,34 +10,40 @@ export default function createContainer({ init, view }, connect) {
   };
 
   spec.getInitialState = function() {
-    return init ?
-    { model: init() } :
-    {};
+    return init ? { model: init() } : {};
   };
 
   spec.render = function() {
     const model = this.state.model;
     const { children } = this.props;
 
-    return view({ model }, ...children);
+    return view({ model, ...this.handlers }, ...children);
   };
 
   spec.componentWillMount = function() {
     const setModel = (model) => {
-      this.setState({ model: { ...this.state.model, ...model} });
+      // TODO: do we need to handle models that aren't objects?
+      this.setState({ model: merge({}, this.state.model, model) });
     };
 
-    const streams = connect(this.context.store);
+    if (connect) {
+      const { model, actions, ...handlers } = connect(this.context.store);
 
-    this.subscription = Rx.Observable.merge(
-      streams.model.do(setModel),
-      ...streams.actions
-    ).subscribe();
+      this.handlers = handlers;
+
+      this.subscription = Rx.Observable.merge(
+        model.do(setModel),
+        ...actions
+      ).subscribe();
+    }
   };
 
   spec.componentWillUnmount = function() {
     this.model = null;
-    this.subscription.dispose();
+
+    if (this.subscription) {
+      this.subscription.dispose();
+    }
   };
 
   const factory = React.createFactory(React.createClass(spec));
