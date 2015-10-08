@@ -3,8 +3,8 @@ import createContainer from '../core/container';
 
 import * as Section from '../components/Section';
 import * as Text from '../components/Text';
-import * as TextField from '../components/TextField';
-import * as PasswordField from '../components/PasswordField';
+import * as TextInput from '../components/TextInput';
+import * as PasswordInput from '../components/PasswordInput';
 import * as Button from '../components/Button';
 
 
@@ -21,8 +21,8 @@ const init = () => ({
 
 const view = ({ model }) => (
   Section.view({},
-    TextField.view({ model: model.username, onInput: ::onUsername.onNext }),
-    PasswordField.view({ model: model.password, onInput: ::onPassword.onNext }),
+    TextInput.view({ model: model.username, onInput: ::onUsername.onNext }),
+    PasswordInput.view({ model: model.password, onInput: ::onPassword.onNext }),
     Button.view({ onClick: ::onLogin.onNext },
       Text.view({ model: 'Login' })))
 );
