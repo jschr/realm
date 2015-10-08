@@ -4,47 +4,26 @@ import Rx from 'rx';
 export default function createStore() {
   const tree = new Baobab();
 
-  const select = (cursor) => (...path) => {
-    cursor = cursor.select(path);
+  window.store = tree;
 
-    const self = {
-      select: select(cursor),
+  const observe = (...path) => {
+    const source = tree.select(path);
 
-      observe() {
-        return Rx.Observable.create((observer) => {
-          cursor.on('update', () => observer.onNext(cursor.get()));
-        });
-      },
-
-      get(key) {
-        return () => {
-          let val;
-
-          if (key) {
-            val = cursor.get(key);
-          } else {
-            val = cursor.get();
-          }
-
-          return val;
-        };
-      },
-
-      set(key) {
-        return (data) => {
-          if (key) {
-            cursor.set(key, data);
-          } else {
-            cursor.set(data);
-          }
-
-          return self;
-        };
-      }
-    };
-
-    return self;
+    return Rx.Observable.create((observer) => {
+      source.on('update', () => observer.onNext(source.get()));
+    });
   };
 
-  return select(tree)();
+  const set = (...path) => (data) => {
+    // TODO: can tree.set cause an error? If so handle it.
+    tree.set(path, data);
+
+    return Rx.Observable.just(data);
+  };
+
+  const get = (...path) => () => {
+    return Rx.Observable.just(tree.get(path));
+  };
+
+  return { observe, set, get };
 }

@@ -15,7 +15,9 @@ const onLogin = new Rx.Subject();
 
 const init = () => ({
   username: '',
-  password: ''
+  password: '',
+  error: null,
+  pending: false
 });
 
 
@@ -23,27 +25,46 @@ const view = ({ model }) => (
   Section.view({},
     TextInput.view({ model: model.username, onInput: ::onUsername.onNext }),
     PasswordInput.view({ model: model.password, onInput: ::onPassword.onNext }),
-    Button.view({ onClick: ::onLogin.onNext },
-      Text.view({ model: 'Login' })))
+    Button.view({ model: { disabled: model.pending }, onClick: ::onLogin.onNext },
+      Text.view({ model: model.pending ? 'Logging In...' : 'Login' })),
+
+    model.error &&
+      Section.view({},
+        Text.view({ model: model.error.message })))
 );
 
+const simulateLoginRequest = (creds) => (
+  Rx.Observable.just(creds)
+    .delay(1000)
+    .selectMany(
+      creds && creds.username === creds.password ?
+        Rx.Observable.just({ name: creds.username, token: 'abc' }) :
+        Rx.Observable.throw(new Error('invalid username or password'))
+    )
+);
 
 export default createContainer({ init, view }, (store) => ({
   model:
-    store.select('login').observe(),
+    store.observe('login').do(::console.log),
 
   run:
     Rx.Observable.merge(
       onUsername
-        .do(store.select('login').set('username')),
+        .selectMany(store.set('login', 'username')),
 
       onPassword
-        .do(store.select('login').set('password')),
+        .selectMany(store.set('login', 'password')),
 
       onLogin
-        .map(store.select('login').get())
-        // .map(({ username }) => ({ username }))
-        .do(store.select('user').set())
-        .do(::console.log)
+        .selectMany(() => store.set('login', 'error')(null))
+        .selectMany(() => store.set('login', 'pending')(true))
+        .selectMany(store.get('login'))
+        .selectMany((creds) =>
+          simulateLoginRequest(creds)
+            .catch(store.set('login', 'error'))
+            .finally(() => store.set('login', 'pending')(false))
+        )
+        .selectMany(store.set('user'))
+
     )
 }));

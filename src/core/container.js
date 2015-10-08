@@ -1,6 +1,7 @@
 import React from 'react';
 import Rx from 'rx';
 import merge from 'lodash.merge';
+import isPlainObject from 'lodash.isplainobject';
 
 export default function createContainer({ init, view }, connect) {
   const spec = {};
@@ -23,7 +24,11 @@ export default function createContainer({ init, view }, connect) {
   spec.componentWillMount = function() {
     const setModel = (model) => {
       // TODO: do we need to handle models that aren't objects?
-      this.setState({ model: merge({}, this.state.model, model) });
+      if (isPlainObject(model)) {
+        this.setState({ model: merge({}, this.state.model, model) });
+      } else {
+        this.setState({ model });
+      }
     };
 
     if (connect) {
