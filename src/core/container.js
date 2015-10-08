@@ -27,13 +27,13 @@ export default function createContainer({ init, view }, connect) {
     };
 
     if (connect) {
-      const { model, actions, ...handlers } = connect(this.context.store);
+      const { model, run, ...handlers } = connect(this.context.store);
 
       this.handlers = handlers;
 
       this.subscription = Rx.Observable.merge(
         model.do(setModel),
-        ...actions
+        run
       ).subscribe();
     }
   };

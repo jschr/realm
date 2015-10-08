@@ -16,6 +16,20 @@ export default function createStore() {
         });
       },
 
+      get(key) {
+        return () => {
+          let val;
+
+          if (key) {
+            val = cursor.get(key);
+          } else {
+            val = cursor.get();
+          }
+
+          return val;
+        };
+      },
+
       set(key) {
         return (data) => {
           if (key) {
