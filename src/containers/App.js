@@ -8,8 +8,10 @@ import Login from './Login';
 
 const routes = {
   login: Login(),
+
   welcome: Text.view({ model: 'Welcome!' })
 };
+
 
 const view = ({ model }) => (
   routes[model] || false

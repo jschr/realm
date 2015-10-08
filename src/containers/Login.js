@@ -33,6 +33,7 @@ const view = ({ model }) => (
         Text.view({ model: model.error.message })))
 );
 
+
 const simulateLoginRequest = (creds) => (
   Rx.Observable.just(creds)
     .delay(1000)
@@ -42,6 +43,7 @@ const simulateLoginRequest = (creds) => (
         Rx.Observable.throw(new Error('invalid username or password'))
     )
 );
+
 
 export default createContainer({ init, view }, (store) => ({
   model:
