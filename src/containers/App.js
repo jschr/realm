@@ -2,12 +2,13 @@ import Rx from 'rx';
 import createContainer from '../core/container';
 
 import * as Text from '../components/Text';
+import * as Section from '../components/Section';
 
 import Login from './Login';
 
 
 const routes = {
-  login: Login(),
+  login: Section.view({}, Login(), Login()),
 
   welcome: Text.view({ model: 'Welcome!' })
 };
@@ -18,25 +19,25 @@ const init = (route = '') => (
 );
 
 
+const actions = () => ({});
+
+
 const view = ({ model = init() }) => (
   routes[model] || false
 );
 
 
-export default createContainer({ view }, (store) => ({
+const update = ({ appState, modelState }) => (
+  Rx.Observable.merge(
+    appState.observe('user', 'token').startWith(null)
+      .filter((token) => !token)
+      .selectMany(() => modelState.set()('login')),
 
-  model:
-    store.observe('route'),
+    appState.observe('user', 'token').startWith(null)
+      .filter((token) => !!token)
+      .selectMany(() => modelState.set()('welcome'))
+  )
+);
 
-  run:
-    Rx.Observable.merge(
-      store.observe('user', 'token').startWith(null)
-        .filter((token) => !token)
-        .selectMany(() => store.set('route')('login')),
 
-      store.observe('user', 'token').startWith(null)
-        .filter((token) => !!token)
-        .selectMany(() => store.set('route')('welcome'))
-    )
-
-}));
+export default createContainer({ init, view, actions, update });

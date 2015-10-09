@@ -8,32 +8,6 @@ import * as PasswordInput from '../components/PasswordInput';
 import * as Button from '../components/Button';
 
 
-const onUsername = new Rx.Subject();
-const onPassword = new Rx.Subject();
-const onLogin = new Rx.Subject();
-
-
-const init = () => ({
-  username: '',
-  password: '',
-  error: null,
-  pending: false
-});
-
-
-const view = ({ model = init() }) => (
-  Section.view({},
-    TextInput.view({ model: model.username, onInput: ::onUsername.onNext }),
-    PasswordInput.view({ model: model.password, onInput: ::onPassword.onNext }),
-    Button.view({ model: { disabled: model.pending }, onClick: ::onLogin.onNext },
-      Text.view({ model: model.pending ? 'Logging In...' : 'Login' })),
-
-    model.error &&
-      Section.view({},
-        Text.view({ model: model.error.message })))
-);
-
-
 const simulateLoginRequest = (creds) => (
   Rx.Observable.just(creds)
     .delay(1000)
@@ -45,29 +19,56 @@ const simulateLoginRequest = (creds) => (
 );
 
 
-export default createContainer({ init, view }, (store) => ({
+const init = () => ({
+  username: '',
+  password: '',
+  error: null,
+  pending: false
+});
 
-  model:
-    store.observe('login').do(::console.log),
 
-  run:
-    Rx.Observable.merge(
-      onUsername
-        .selectMany(store.set('login', 'username')),
+const actions = () => ({
+  onUsername: new Rx.Subject(),
+  onPassword: new Rx.Subject(),
+  onLogin: new Rx.Subject()
+});
 
-      onPassword
-        .selectMany(store.set('login', 'password')),
 
-      onLogin
-        .selectMany(() => store.set('login', 'error')(null))
-        .selectMany(() => store.set('login', 'pending')(true))
-        .selectMany(store.get('login'))
-        .selectMany((creds) =>
-          simulateLoginRequest(creds)
-            .catch(store.set('login', 'error'))
-            .finally(() => store.set('login', 'pending')(false))
-        )
-        .selectMany(store.set('user'))
-    )
+const view = ({ model, onUsername, onPassword, onLogin }) => (
+  Section.view({},
+    TextInput.view({ model: model.username, onInput: onUsername }),
+    PasswordInput.view({ model: model.password, onInput: onPassword }),
+    Button.view({ model: { disabled: model.pending }, onClick: onLogin },
+      Text.view({ model: model.pending ? 'Logging In...' : 'Login' })),
 
-}));
+    model.error &&
+      Section.view({},
+        Text.view({ model: model.error.message })))
+);
+
+
+const update = ({ appState, modelState, onUsername, onPassword, onLogin }) => (
+  Rx.Observable.merge(
+    onUsername
+      .selectMany(modelState.set('username')),
+
+    onPassword
+      .selectMany(modelState.set('password')),
+
+    onLogin
+      .selectMany(() => modelState.set('error')(null))
+      .selectMany(() => modelState.set('pending')(true))
+      .selectMany(modelState.get())
+      .selectMany((creds) =>
+        simulateLoginRequest(creds)
+          // TODO: clean this up
+          .catch((err) => modelState.set('error')(err).selectMany(Rx.Observable.empty()))
+          .finally(() => modelState.set('pending')(false))
+      )
+      .do(::console.log)
+      .selectMany(appState.set('user'))
+  )
+);
+
+
+export default createContainer({ init, view, actions, update });

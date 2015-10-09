@@ -2,12 +2,13 @@ import React from 'react';
 import Rx from 'rx';
 import merge from 'lodash.merge';
 import isPlainObject from 'lodash.isplainobject';
+import uniqueId from 'lodash.uniqueid';
 
-export default function createContainer({ init, view }, connect) {
+export default function createContainer({ init, view, actions, update }) {
   const spec = {};
 
   spec.contextTypes = {
-    store: React.PropTypes.object
+    appState: React.PropTypes.object
   };
 
   spec.getInitialState = function() {
@@ -17,11 +18,14 @@ export default function createContainer({ init, view }, connect) {
   spec.render = function() {
     const model = this.state.model;
     const { children } = this.props;
+    const context = this.context;
 
-    return view({ model, ...this.handlers }, ...children);
+    return view({ model, context, ...this.actions }, ...children);
   };
 
   spec.componentWillMount = function() {
+    const appState = this.context.appState;
+
     const setModel = (model) => {
       // TODO: do we need to handle models that aren't objects?
       if (isPlainObject(model)) {
@@ -31,16 +35,16 @@ export default function createContainer({ init, view }, connect) {
       }
     };
 
-    if (connect) {
-      const { model, run, ...handlers } = connect(this.context.store);
+    const modelState = appState.fork('__models__', uniqueId('m_'));
 
-      this.handlers = handlers;
+    this.modelState = modelState;
+    this.actions = actions();
+    this.update = update({ appState, modelState, ...this.actions });
 
-      this.subscription = Rx.Observable.merge(
-        model.do(setModel),
-        run
-      ).subscribe();
-    }
+    this.subscription = Rx.Observable.merge(
+      this.modelState.observe().do(setModel),
+      this.update
+    ).subscribe();
   };
 
   spec.componentWillUnmount = function() {

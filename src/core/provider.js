@@ -4,12 +4,12 @@ import createStore from './store';
 const spec = {};
 
 spec.childContextTypes = {
-  store: React.PropTypes.object
+  appState: React.PropTypes.object
 };
 
 spec.getChildContext = function() {
   return {
-    store: createStore()
+    appState: createStore()
   };
 };
 
