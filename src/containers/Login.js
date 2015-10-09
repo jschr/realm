@@ -46,6 +46,7 @@ const simulateLoginRequest = (creds) => (
 
 
 export default createContainer({ init, view }, (store) => ({
+
   model:
     store.observe('login').do(::console.log),
 
@@ -69,4 +70,5 @@ export default createContainer({ init, view }, (store) => ({
         .selectMany(store.set('user'))
 
     )
+
 }));

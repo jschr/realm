@@ -19,6 +19,7 @@ const view = ({ model }) => (
 
 
 export default createContainer({ view }, (store) => ({
+
   model:
     store.observe('route'),
 
@@ -32,4 +33,5 @@ export default createContainer({ view }, (store) => ({
         .filter((token) => !!token)
         .selectMany(() => store.set('route')('welcome'))
     )
+
 }));
