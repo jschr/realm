@@ -7,8 +7,5 @@ export const init = (disabled = false) => ({
 
 
 export const view = ({ model = init(), onClick }, ...children) => (
-  React.DOM.button({
-    disabled: model.disabled,
-    onClick
-  }, ...children)
+  React.DOM.button({ disabled: model.disabled, onClick }, ...children)
 );
