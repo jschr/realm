@@ -68,7 +68,6 @@ export default createContainer({ init, view }, (store) => ({
             .finally(() => store.set('login', 'pending')(false))
         )
         .selectMany(store.set('user'))
-
     )
 
 }));
