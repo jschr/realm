@@ -65,7 +65,6 @@ const update = ({ appState, modelState, onUsername, onPassword, onLogin }) => (
           .catch((err) => modelState.set('error')(err).selectMany(Rx.Observable.empty()))
           .finally(() => modelState.set('pending')(false))
       )
-      .do(::console.log)
       .selectMany(appState.set('user'))
   )
 );

@@ -48,11 +48,12 @@ export default function createContainer({ init, view, actions, update }) {
   };
 
   spec.componentWillUnmount = function() {
-    this.model = null;
+    this.subscription.dispose();
 
-    if (this.subscription) {
-      this.subscription.dispose();
-    }
+    this.modelState = null;
+    this.actions = null;
+    this.update = null;
+    this.subscription = null;
   };
 
   const factory = React.createFactory(React.createClass(spec));
