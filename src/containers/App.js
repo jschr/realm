@@ -13,7 +13,12 @@ const routes = {
 };
 
 
-const view = ({ model }) => (
+const init = (route = '') => (
+  route
+);
+
+
+const view = ({ model = init() }) => (
   routes[model] || false
 );
 

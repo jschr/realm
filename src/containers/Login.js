@@ -21,7 +21,7 @@ const init = () => ({
 });
 
 
-const view = ({ model }) => (
+const view = ({ model = init() }) => (
   Section.view({},
     TextInput.view({ model: model.username, onInput: ::onUsername.onNext }),
     PasswordInput.view({ model: model.password, onInput: ::onPassword.onNext }),
