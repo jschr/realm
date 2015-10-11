@@ -27,7 +27,6 @@ export default function createContainer({ init, view, actions, update }) {
     const appState = this.context.appState;
 
     const setModel = (model) => {
-      // TODO: do we need to handle models that aren't objects?
       if (isPlainObject(model)) {
         this.setState({ model: merge({}, this.state.model, model) });
       } else {
@@ -35,7 +34,7 @@ export default function createContainer({ init, view, actions, update }) {
       }
     };
 
-    const modelState = appState.fork('__models__', uniqueId('m_'));
+    const modelState = appState.fork('__models__', uniqueId('m_'))(init());
 
     this.modelState = modelState;
     this.actions = actions();

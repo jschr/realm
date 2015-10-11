@@ -9,10 +9,7 @@ var plugins = [
   })
 ];
 
-var devtool;
-
 if (process.env.NODE_ENV === 'development') {
-  devtool = 'source-map';
   plugins = plugins.concat([
     new webpack.HotModuleReplacementPlugin()
   ]);

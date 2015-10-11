@@ -21,10 +21,8 @@ export default function createStore(cursor) {
 
   const set = (...path) => {
     const setter = (data) => {
-      // TODO: can cursor.set cause an error? If so handle it.
-      cursor.set(path, data);
-
-      return Rx.Observable.just(data);
+      return Rx.Observable.just(data)
+        .do(() => cursor.set(path, data));
     };
 
     setter.to = (data) => () => setter(data);
@@ -34,6 +32,7 @@ export default function createStore(cursor) {
 
   const merge = (...path) => (data) => {
     // TODO: can cursor.merge cause an error? If so handle it.
+    console.log(path, data);
     cursor.merge(path, data);
 
     return Rx.Observable.just(data);
@@ -43,8 +42,14 @@ export default function createStore(cursor) {
     return Rx.Observable.just(cursor.get(path));
   };
 
-  const fork = (...path) => {
-    return createStore(cursor.select(...path));
+  const fork = (...path) => (initialData) => {
+    const forked = cursor.select(...path);
+
+    if (typeof initialData !== undefined) {
+      forked.set(initialData);
+    }
+
+    return createStore(forked);
   };
 
   return { observe, set, get, merge, fork };
