@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 var WebpackDevServer = require('webpack-dev-server');
 var config = require('./webpack.config');
-var port = process.env.PORT || 5004;
+var port = process.env.PORT || 5000;
 
 config.entry = Object.keys(config.entry).reduce(function (result, key) {
   result[key] = [
@@ -12,6 +12,7 @@ config.entry = Object.keys(config.entry).reduce(function (result, key) {
 }, {});
 
 new WebpackDevServer(webpack(config), {
+  contentBase: './examples/login',
   publicPath: config.output.publicPath,
   stats: {
     chunkModules: false,

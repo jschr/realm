@@ -4,9 +4,11 @@
   "description": "",
   "scripts": {
     "start": "NODE_ENV=development node server.js",
-    "start-examples": "NODE_ENV=development node examples/server.js",
+    "start-counters-example": "NODE_ENV=development node examples/counters/server.js",
+    "start-login-example": "NODE_ENV=development node examples/login/server.js",
+    "start-pong-example": "NODE_ENV=development node examples/pong/server.js",
     "build": "NODE_ENV=production webpack -p",
-    "build-examples": "NODE_ENV=production webpack -p --config examples/webpack.config.js"
+    "build-examples": "NODE_ENV=production webpack -p --config examples/counters/webpack.config.js"
   },
   "author": "",
   "license": "ISC",

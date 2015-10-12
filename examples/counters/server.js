@@ -12,6 +12,7 @@ config.entry = Object.keys(config.entry).reduce(function (result, key) {
 }, {});
 
 new WebpackDevServer(webpack(config), {
+  contentBase: './examples/counters',
   publicPath: config.output.publicPath,
   stats: {
     chunkModules: false,
