@@ -2,6 +2,5 @@ node_modules
 build
 lib
 dist
-webpack.*.js
-server.js
-build.js
+**/webpack.*.js
+**/server.js

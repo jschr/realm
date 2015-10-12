@@ -1,8 +1,4 @@
-logs
+.DS_Store
 node_modules
 dist
-lib
-build
-.DS_Store
 *.log
-build.js
