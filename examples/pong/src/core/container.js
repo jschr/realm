@@ -25,6 +25,8 @@ export default function createContainer({ init, view, actions, update }) {
 
   spec.componentWillMount = function() {
     const appState = this.context.appState;
+    const initialModel = init();
+    const modelState = appState.fork('__models__', uniqueId('m_'))(initialModel);
 
     const setModel = (model) => {
       if (isPlainObject(model)) {
@@ -33,8 +35,6 @@ export default function createContainer({ init, view, actions, update }) {
         this.setState({ model });
       }
     };
-
-    const modelState = appState.fork('__models__', uniqueId('m_'))(init());
 
     this.modelState = modelState;
     this.actions = actions();

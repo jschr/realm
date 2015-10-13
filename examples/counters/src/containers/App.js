@@ -17,7 +17,7 @@ const actions = () => ({
 });
 
 
-const view = ({ model = init(), counter, counter2 }) => (
+const view = ({ model, counter, counter2 }) => (
   Section.view({},
     Counter.view({ model: model.counter, ...counter }),
     Counter.view({ model: model.counter2, ...counter2 }))
