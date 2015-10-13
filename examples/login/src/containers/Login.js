@@ -48,11 +48,14 @@ const update = ({ appState, modelState, onUsername, onPassword, onLogin }) => (
       .selectMany(modelState.get())
       .selectMany((creds) =>
         simulateLoginRequest(creds)
-          // TODO: clean this up
-          .catch((err) => modelState.set('error')(err).selectMany(Rx.Observable.empty()))
-          .finally(() => modelState.set('pending')(false))
+          .catch((err) =>
+            modelState.set('error')(err)
+              .selectMany(() => modelState.set('pending')(false))
+              .selectMany(Rx.Observable.empty())
+          )
       )
       .selectMany(appState.set('user'))
+      .selectMany(() => modelState.set('pending')(false))
   )
 );
 
