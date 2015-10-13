@@ -32,7 +32,6 @@ export default function createStore(cursor) {
 
   const merge = (...path) => (data) => {
     // TODO: can cursor.merge cause an error? If so handle it.
-    console.log(path, data);
     cursor.merge(path, data);
 
     return Rx.Observable.just(data);
@@ -45,7 +44,7 @@ export default function createStore(cursor) {
   const fork = (...path) => (initialData) => {
     const forked = cursor.select(...path);
 
-    if (typeof initialData !== undefined) {
+    if (initialData !== undefined) {
       forked.set(initialData);
     }
 

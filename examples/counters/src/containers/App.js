@@ -1,25 +1,35 @@
 import Rx from 'rx';
 import createContainer from '../core/container';
 
-import * as Text from '../components/Text';
+import * as Counter from '../components/Counter';
 import * as Section from '../components/Section';
 
 
 const init = () => ({
-  welcomeText: Text.init('It Works!')
+  counter: Counter.init(0),
+  counter2: Counter.init(0)
 });
 
 
-const actions = () => ({});
+const actions = () => ({
+  counter: Counter.actions(),
+  counter2: Counter.actions()
+});
 
 
-const view = ({ model = init() }) => (
+const view = ({ model = init(), counter, counter2 }) => (
   Section.view({},
-    Text.view({ model: model.welcomeText }))
+    Counter.view({ model: model.counter, ...counter }),
+    Counter.view({ model: model.counter2, ...counter2 }))
 );
 
 
-const update = () => (Rx.Observable.empty());
+const update = ({ modelState, counter, counter2 }) => (
+  Rx.Observable.merge(
+    Counter.update({ modelState: modelState.fork('counter')(), ...counter }),
+    Counter.update({ modelState: modelState.fork('counter2')(), ...counter2 })
+  )
+);
 
 
 export default createContainer({ init, view, actions, update });
