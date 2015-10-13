@@ -22,6 +22,9 @@ const containerStyle = {
 };
 
 
+const update = () => Rx.Observable.empty();
+
+
 const view = () => (
   Section.view({},
     Section.view({ style: containerStyle }, Pong()),
@@ -31,7 +34,4 @@ const view = () => (
 );
 
 
-const update = () => Rx.Observable.empty();
-
-
-export default createContainer({ init, view, actions, update });
+export default createContainer({ init, actions, update, view });

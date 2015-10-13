@@ -34,19 +34,6 @@ const actions = () => ({
 });
 
 
-const view = ({ model, onUsername, onPassword, onLogin }) => (
-  Section.view({},
-    TextInput.view({ model: model.username, onInput: onUsername }),
-    PasswordInput.view({ model: model.password, onInput: onPassword }),
-    Button.view({ model: { disabled: model.pending }, onClick: onLogin },
-      Text.view({ model: model.pending ? 'Logging In...' : 'Login' })),
-
-    model.error &&
-      Section.view({},
-        Text.view({ model: model.error.message })))
-);
-
-
 const update = ({ appState, modelState, onUsername, onPassword, onLogin }) => (
   Rx.Observable.merge(
     onUsername
@@ -70,4 +57,17 @@ const update = ({ appState, modelState, onUsername, onPassword, onLogin }) => (
 );
 
 
-export default createContainer({ init, view, actions, update });
+const view = ({ model, onUsername, onPassword, onLogin }) => (
+  Section.view({},
+    TextInput.view({ model: model.username, onInput: onUsername }),
+    PasswordInput.view({ model: model.password, onInput: onPassword }),
+    Button.view({ model: { disabled: model.pending }, onClick: onLogin },
+      Text.view({ model: model.pending ? 'Logging In...' : 'Login' })),
+
+    model.error &&
+      Section.view({},
+        Text.view({ model: model.error.message })))
+);
+
+
+export default createContainer({ init, actions, update, view });

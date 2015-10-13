@@ -7,24 +7,12 @@ import * as Section from '../components/Section';
 import Login from './Login';
 
 
-const routes = {
-  login: Section.view({}, Login()),
-
-  welcome: Text.view({ model: 'Welcome!' })
-};
-
-
 const init = (route = '') => (
   route
 );
 
 
 const actions = () => ({});
-
-
-const view = ({ model = init() }) => (
-  routes[model] || false
-);
 
 
 const update = ({ appState, modelState }) => (
@@ -40,4 +28,15 @@ const update = ({ appState, modelState }) => (
 );
 
 
-export default createContainer({ init, view, actions, update });
+const routes = {
+  login: Section.view({}, Login()),
+
+  welcome: Text.view({ model: 'Welcome!' })
+};
+
+const view = ({ model = init() }) => (
+  routes[model] || false
+);
+
+
+export default createContainer({ init, actions, update, view });

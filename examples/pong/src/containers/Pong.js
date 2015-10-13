@@ -23,6 +23,12 @@ const speedUp = (val) => (
 );
 
 
+const onKeyboard = Rx.Observable.create((observer) => {
+  document.addEventListener('keydown', (e) => observer.onNext({ code: e.which, pressed: true }));
+  document.addEventListener('keyup', (e) => observer.onNext({ code: e.which, pressed: false }));
+});
+
+
 const init = () => ({
   playerOneScore: Score.init(0),
 
@@ -33,12 +39,6 @@ const init = () => ({
   paddleTop: Paddle.init('top', (WIDTH / 2) - (PADDLE_WIDTH / 2)),
 
   paddleBottom: Paddle.init('bottom', (WIDTH / 2) - (PADDLE_WIDTH / 2))
-});
-
-
-const onKeyboard = Rx.Observable.create((observer) => {
-  document.addEventListener('keydown', (e) => observer.onNext({ code: e.which, pressed: true }));
-  document.addEventListener('keyup', (e) => observer.onNext({ code: e.which, pressed: false }));
 });
 
 
@@ -59,26 +59,6 @@ const actions = () => ({
     .map((x) => x.pressed)
     .distinctUntilChanged()
 });
-
-
-const view = ({ model = init() }) => (
-  Surface.view({},
-    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) - (HEIGHT / 4) } },
-      Score.view({ model: model.playerTwoScore })),
-
-    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) + (HEIGHT / 4) } },
-      Score.view({ model: model.playerOneScore })),
-
-    Divider.view({}),
-
-    Court.view({}),
-
-    Ball.view({ model: model.ball }),
-
-    Paddle.view({ model: model.paddleTop }),
-
-    Paddle.view({ model: model.paddleBottom }))
-);
 
 
 const update = ({ modelState, playerOneMoveRight, playerOneMoveLeft, playerTwoMoveRight, playerTwoMoveLeft }) => (
@@ -273,4 +253,24 @@ const update = ({ modelState, playerOneMoveRight, playerOneMoveLeft, playerTwoMo
 );
 
 
-export default createContainer({ init, view, actions, update });
+const view = ({ model = init() }) => (
+  Surface.view({},
+    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) - (HEIGHT / 4) } },
+      Score.view({ model: model.playerTwoScore })),
+
+    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) + (HEIGHT / 4) } },
+      Score.view({ model: model.playerOneScore })),
+
+    Divider.view({}),
+
+    Court.view({}),
+
+    Ball.view({ model: model.ball }),
+
+    Paddle.view({ model: model.paddleTop }),
+
+    Paddle.view({ model: model.paddleBottom }))
+);
+
+
+export default createContainer({ init, actions, update, view });

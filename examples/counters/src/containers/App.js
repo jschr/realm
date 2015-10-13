@@ -17,13 +17,6 @@ const actions = () => ({
 });
 
 
-const view = ({ model, counter, counter2 }) => (
-  Section.view({},
-    Counter.view({ model: model.counter, ...counter }),
-    Counter.view({ model: model.counter2, ...counter2 }))
-);
-
-
 const update = ({ modelState, counter, counter2 }) => (
   Rx.Observable.merge(
     Counter.update({ modelState: modelState.fork('counter')(), ...counter }),
@@ -32,4 +25,11 @@ const update = ({ modelState, counter, counter2 }) => (
 );
 
 
-export default createContainer({ init, view, actions, update });
+const view = ({ model, counter, counter2 }) => (
+  Section.view({},
+    Counter.view({ model: model.counter, ...counter }),
+    Counter.view({ model: model.counter2, ...counter2 }))
+);
+
+
+export default createContainer({ init, actions, update, view });
