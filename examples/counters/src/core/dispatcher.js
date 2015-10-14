@@ -26,8 +26,8 @@ export default class Dispatcher {
 }
 
 
-export const forward = (dispatch, forwardType) => {
+export const forward = (dispatch, forwardType, forwardData) => {
   return (type) => (payload) => {
-    return dispatch(forwardType)({ type, payload });
+    return dispatch(forwardType)({ forward: { type, payload }, ...forwardData });
   };
 };

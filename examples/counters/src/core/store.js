@@ -36,6 +36,7 @@ export default function createStore(cursor) {
   };
 
   const fork = (...path) => {
+    console.log(path);
     return createStore(cursor.select(...path));
   };
 

@@ -12,11 +12,15 @@ export const init = (count = 0) => ({
 
 export const update = ({ modelState, action }) => (
   Rx.Observable.case(() => action.type, {
-    increment:
-      modelState.update('count', (count) => count + 1)(),
+    decrement: Rx.Observable.just()
+      .selectMany(modelState.update('count', (c) =>
+        c - 1
+      )),
 
-    decrement:
-      modelState.update('count', (count) => count - 1)()
+    increment: Rx.Observable.just()
+      .selectMany(modelState.update('count', (c) =>
+        c + 1
+      ))
   })
 );
 
