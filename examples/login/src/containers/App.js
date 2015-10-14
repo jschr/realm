@@ -1,42 +1,64 @@
 import Rx from 'rx';
 import createContainer from '../core/container';
+import { forward } from '../core/dispatcher';
 
 import * as Text from '../components/Text';
 import * as Section from '../components/Section';
-
-import Login from './Login';
-
-
-const init = (route = '') => (
-  route
-);
+import * as Login from '../components/Login';
 
 
-const actions = () => ({});
+const init = (route, user) => ({
+  route,
+  user,
+  login: Login.init()
+});
 
 
-const update = ({ appState, modelState }) => (
-  Rx.Observable.merge(
-    appState.observe('user', 'token').startWith(null)
-      .filter((token) => !token)
-      .selectMany(() => modelState.set()('login')),
+export const update = ({ modelState, action }) => (
+  Rx.Observable.case(() => action.type, {
+    route: Rx.Observable.just(action.payload)
+      .selectMany(modelState.set('route')),
 
-    appState.observe('user', 'token').startWith(null)
-      .filter((token) => !!token)
-      .selectMany(() => modelState.set()('welcome'))
-  )
+    login: Rx.Observable.just(action.payload)
+      .selectMany((payload) =>
+        Login.update({
+          modelState: modelState.fork('login'),
+          // TODO: payload.action a better name?
+          action: payload.forward
+        })
+          // continue with successful login, cleaner way to do this?
+          .filter(() => payload.forward.type === 'login')
+          .selectMany(modelState.set('user'))
+      )
+  })
 );
 
 
 const routes = {
-  login: Section.view({}, Login()),
+  login: (model, dispatch) =>
+    Section.view({}, Login.view({ model: model.login, dispatch: forward(dispatch, 'login') })),
 
-  welcome: Text.view({ model: 'Welcome!' })
+  welcome: () =>
+    Text.view({ model: 'Welcome!' })
 };
 
-const view = ({ model = init() }) => (
-  routes[model] || false
+
+const view = ({ model = init(), dispatch }) => (
+  routes[model.route] ? routes[model.route](model, dispatch) : false
 );
 
 
-export default createContainer({ init, actions, update, view });
+export const run = ({ modelState, dispatch }) => (
+  Rx.Observable.merge(
+    modelState.observe('user', 'token').startWith(null)
+      .filter((token) => !token)
+      .do(() => dispatch('route')('login')),
+
+    modelState.observe('user', 'token').startWith(null)
+      .filter((token) => !!token)
+      .do(() => dispatch('route')('welcome'))
+  )
+);
+
+
+export default createContainer({ init, update, view, run });
