@@ -28,33 +28,31 @@ export default function createContainer({ init, view, update, run }) {
 
   spec.componentWillMount = function() {
     const appState = this.context.appState;
-    const initialModel = init();
-    const modelState = appState.fork('__models__', uniqueId('m_'))(initialModel);
+    const modelState = appState.fork('__models__', uniqueId('m_'));
     const dispatcher = new Dispatcher();
     const dispatch = ::dispatcher.dispatch;
 
-    this.modelState = modelState;
-    this.dispatcher = dispatcher;
     this.dispatch = dispatch;
 
     this.subscription = Rx.Observable.merge(
-      this.modelState.observe()
+      Rx.Observable.just(init())
+        .selectMany(modelState.set())
+        .selectMany(modelState.observe())
         .do((model) => this.setState({ model })),
 
-      this.dispatcher.observe()
+      dispatcher.observe()
         .selectMany((action) => update({ appState, modelState, action })),
 
       run ?
         run({ appState, modelState, dispatch, dispatcher }) :
         Rx.Observable.empty()
-    ).subscribe();
+    )
+      .subscribe();
   };
 
   spec.componentWillUnmount = function() {
     this.subscription.dispose();
 
-    this.modelState = null;
-    this.dispatcher = null;
     this.dispatch = null;
     this.subscription = null;
   };

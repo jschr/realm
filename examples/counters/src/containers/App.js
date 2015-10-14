@@ -14,7 +14,7 @@ const update = ({ modelState, action }) => (
   Rx.Observable.case(() => action.type, {
     counter:
       Counter.update({
-        modelState: modelState.fork('counter')(),
+        modelState: modelState.fork('counter'),
         action: action.payload
       })
   })
@@ -24,6 +24,7 @@ const update = ({ modelState, action }) => (
 const view = ({ model, dispatch }) => (
   Counter.view({ model: model.counter, dispatch: forward(dispatch, 'counter') })
 );
+
 
 const run = () => Rx.Observable.empty();
 // const run = ({ dispatch }) => (

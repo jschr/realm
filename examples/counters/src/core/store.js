@@ -16,43 +16,27 @@ export default function createStore(cursor) {
     });
   };
 
-  const set = (...path) => {
-    const setter = (data) => {
-      return Rx.Observable.just(data)
-        .do(() => cursor.set(path, data));
-    };
-
-    setter.to = (data) => () => setter(data);
-
-    return setter;
+  const set = (...path) => (data) => {
+    return Rx.Observable.just(data)
+      .do(() => cursor.set(path, data));
   };
 
   const merge = (...path) => (data) => {
-    // TODO: can cursor.merge cause an error? If so handle it.
-    cursor.merge(path, data);
-
-    return Rx.Observable.just(data);
+    return Rx.Observable.just(data)
+      .do(() => cursor.merge(path, data));
   };
 
   const update = (path, fn) => (data) => {
     return Rx.Observable.just(data)
-      .do(() =>
-        cursor.set(path, fn(cursor.get(path), data))
-      );
+      .do(() => cursor.set(path, fn(cursor.get(path), data)));
   };
 
   const get = (...path) => () => {
     return Rx.Observable.just(cursor.get(path));
   };
 
-  const fork = (...path) => (initialData) => {
-    const forked = cursor.select(...path);
-
-    if (initialData !== undefined) {
-      forked.set(initialData);
-    }
-
-    return createStore(forked);
+  const fork = (...path) => {
+    return createStore(cursor.select(...path));
   };
 
   return { observe, set, get, merge, update, fork };
