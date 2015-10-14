@@ -38,8 +38,10 @@ const view = ({ model, dispatch }) => (
     Button.view({ onClick: dispatch('remove') }, Text.view({ model: 'Remove' })),
 
     ...model.counters.map((counter, i) =>
-      Counter.view({ model: counter, dispatch: forward(dispatch, 'counters', { i }) })))
+      Counter.view({ model: counter, dispatch: forward(dispatch, 'counters', { i }) })
+    ))
 );
+
 
 const run = () => Rx.Observable.empty();
 // const run = ({ modelState, dispatch }) => (
@@ -47,6 +49,7 @@ const run = () => Rx.Observable.empty();
 //     .selectMany(modelState.get('counters'))
 //     .map((counters) => counters.length)
 //     .selectMany((length) => Rx.Observable.from({ length }, (v, i) => i))
+//     // TODO: bind to update method instead of redirecting through dispatch?
 //     .do((i) => forward(dispatch, 'counters', { i })('increment')())
 // );
 

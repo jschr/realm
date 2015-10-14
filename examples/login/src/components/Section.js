@@ -1,6 +1,6 @@
 import React from 'react';
 
 
-export const view = ({ handlers, style }, ...children) => (
-  React.DOM.div({ style, ...handlers }, ...children)
+export const view = ({ style }, ...children) => (
+  React.DOM.div({ style }, ...children)
 );

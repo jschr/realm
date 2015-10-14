@@ -6,6 +6,6 @@ export const init = (str = '') => (
 );
 
 
-export const view = ({ model = init(), style, handlers }) => (
-  React.DOM.span({ style, ...handlers }, model)
+export const view = ({ model = init(), style }) => (
+  React.DOM.span({ style }, model)
 );
