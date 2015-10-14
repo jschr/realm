@@ -1,4 +1,4 @@
-A boilerplate for creating scalable apps with react, rxjs and a little bit of magic. Heavily inspired by flux, redux and elm architecture. (WIP)
+A boilerplate for creating scalable apps with react, rxjs and a little bit of magic. Heavily inspired by flux, redux and elm architecture.
 
 ```
 npm install
