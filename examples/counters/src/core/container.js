@@ -1,10 +1,12 @@
 import React from 'react';
 import Rx from 'rx';
-import merge from 'lodash.merge';
-import isPlainObject from 'lodash.isplainobject';
+// import merge from 'lodash.merge';
+// import isPlainObject from 'lodash.isplainobject';
 import uniqueId from 'lodash.uniqueid';
 
-export default function createContainer({ init, view, actions, update }) {
+import Dispatcher from './dispatcher';
+
+export default function createContainer({ init, view, update }) {
   const spec = {};
 
   spec.contextTypes = {
@@ -17,10 +19,11 @@ export default function createContainer({ init, view, actions, update }) {
 
   spec.render = function() {
     const model = this.state.model;
-    const { children } = this.props;
     const context = this.context;
+    const dispatch = this.dispatch;
+    const { children } = this.props;
 
-    return view({ model, context, ...this.actions }, ...children);
+    return view({ model, context, dispatch }, ...children);
   };
 
   spec.componentWillMount = function() {
@@ -28,21 +31,16 @@ export default function createContainer({ init, view, actions, update }) {
     const initialModel = init();
     const modelState = appState.fork('__models__', uniqueId('m_'))(initialModel);
 
-    const setModel = (model) => {
-      if (isPlainObject(model)) {
-        this.setState({ model: merge({}, this.state.model, model) });
-      } else {
-        this.setState({ model });
-      }
-    };
-
     this.modelState = modelState;
-    this.actions = actions();
-    this.update = update({ appState, modelState, ...this.actions });
+    this.dispatcher = new Dispatcher();
+    this.dispatch = ::this.dispatcher.dispatch;
 
     this.subscription = Rx.Observable.merge(
-      this.modelState.observe().do(setModel),
-      this.update
+      this.modelState.observe()
+        .do((model) => this.setState({ model })),
+
+      this.dispatcher.observe()
+        .selectMany((action) => update({ appState, modelState, action }))
     ).subscribe();
   };
 
@@ -50,8 +48,8 @@ export default function createContainer({ init, view, actions, update }) {
     this.subscription.dispose();
 
     this.modelState = null;
-    this.actions = null;
-    this.update = null;
+    this.dispatcher = null;
+    this.dispatch = null;
     this.subscription = null;
   };
 

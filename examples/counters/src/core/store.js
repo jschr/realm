@@ -10,12 +10,9 @@ export default function createStore(cursor) {
 
   const observe = (...path) => {
     const source = cursor.select(path);
-    // console.log(path);
-    // const watcher = cursor.watch(path);
 
     return Rx.Observable.create((observer) => {
       source.on('update', () => observer.onNext(source.get()));
-      // cursor.on('update', () => observer.onNext(watcher.get()));
     });
   };
 
@@ -37,6 +34,13 @@ export default function createStore(cursor) {
     return Rx.Observable.just(data);
   };
 
+  const update = (path, fn) => (data) => {
+    return Rx.Observable.just(data)
+      .do(() =>
+        cursor.set(path, fn(cursor.get(path), data))
+      );
+  };
+
   const get = (...path) => () => {
     return Rx.Observable.just(cursor.get(path));
   };
@@ -51,5 +55,5 @@ export default function createStore(cursor) {
     return createStore(forked);
   };
 
-  return { observe, set, get, merge, fork };
+  return { observe, set, get, merge, update, fork };
 }
