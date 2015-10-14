@@ -1,9 +1,13 @@
 import ReactDOM from 'react-dom';
-import provider from './core/provider';
+import createStore from './core/store';
 
-import app from './containers/App';
+import App from './containers/App';
 
 
 const selector = document.currentScript.getAttribute('data-container');
+const appState = createStore();
 
-ReactDOM.render(provider(app()), document.querySelector(selector));
+ReactDOM.render(
+  App({ modelState: appState }),
+  document.querySelector(selector)
+);

@@ -49,7 +49,6 @@ const run = () => Rx.Observable.empty();
 //     .selectMany(modelState.get('counters'))
 //     .map((counters) => counters.length)
 //     .selectMany((length) => Rx.Observable.from({ length }, (v, i) => i))
-//     // TODO: bind to update method instead of redirecting through dispatch?
 //     .do((i) => forward(dispatch, 'counters', { i })('increment')())
 // );
 

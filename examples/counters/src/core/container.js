@@ -1,17 +1,10 @@
 import React from 'react';
 import Rx from 'rx';
-// import merge from 'lodash.merge';
-// import isPlainObject from 'lodash.isplainobject';
-import uniqueId from 'lodash.uniqueid';
 
 import Dispatcher from './dispatcher';
 
 export default function createContainer({ init, view, update, run }) {
   const spec = {};
-
-  spec.contextTypes = {
-    appState: React.PropTypes.object
-  };
 
   spec.getInitialState = function() {
     return init ? { model: init() } : {};
@@ -27,8 +20,7 @@ export default function createContainer({ init, view, update, run }) {
   };
 
   spec.componentWillMount = function() {
-    const appState = this.context.appState;
-    const modelState = appState.fork('__models__', uniqueId('m_'));
+    const modelState = this.props.modelState;
     const dispatcher = new Dispatcher();
     const dispatch = ::dispatcher.dispatch;
 
@@ -41,10 +33,10 @@ export default function createContainer({ init, view, update, run }) {
         .do((model) => this.setState({ model })),
 
       dispatcher.observe()
-        .selectMany((action) => update({ appState, modelState, action })),
+        .selectMany((action) => update({ modelState, action })),
 
       run ?
-        run({ appState, modelState, dispatch, dispatcher }) :
+        run({ modelState, dispatch, dispatcher }) :
         Rx.Observable.empty()
     )
       .subscribe();
