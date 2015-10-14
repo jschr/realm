@@ -46,16 +46,13 @@ const view = ({ model, dispatch }) => (
 );
 
 
-const run = () => Rx.Observable.empty();
-// const run = ({ dispatch }) => (
-//   Rx.Observable.merge(
-//     Rx.Observable.interval(1000)
-//       .do(forward(dispatch, 'counter')('increment')),
-//
-//     Rx.Observable.interval(500)
-//       .do(forward(dispatch, 'counter2')('increment')),
-//   )
-// );
+const run = ({ modelState, dispatch }) => (
+  Rx.Observable.interval(1000)
+    .selectMany(modelState.get('counters'))
+    .map((counters) => counters.length)
+    .selectMany((length) => Rx.Observable.from({ length }, (v, i) => i))
+    .do((i) => forward(dispatch, 'counters', { i })('increment')())
+);
 
 
 export default createContainer({ init, update, view, run });
