@@ -6,7 +6,7 @@ npm start
 ```
 
 ```
-npm run start-couter-example
+npm run start-couters-example
 npm run start-login-example
 npm run start-pong-example
 ```
