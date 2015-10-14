@@ -6,7 +6,7 @@ import uniqueId from 'lodash.uniqueid';
 
 import Dispatcher from './dispatcher';
 
-export default function createContainer({ init, view, update }) {
+export default function createContainer({ init, view, update, run }) {
   const spec = {};
 
   spec.contextTypes = {
@@ -30,17 +30,23 @@ export default function createContainer({ init, view, update }) {
     const appState = this.context.appState;
     const initialModel = init();
     const modelState = appState.fork('__models__', uniqueId('m_'))(initialModel);
+    const dispatcher = new Dispatcher();
+    const dispatch = ::dispatcher.dispatch;
 
     this.modelState = modelState;
-    this.dispatcher = new Dispatcher();
-    this.dispatch = ::this.dispatcher.dispatch;
+    this.dispatcher = dispatcher;
+    this.dispatch = dispatch;
 
     this.subscription = Rx.Observable.merge(
       this.modelState.observe()
         .do((model) => this.setState({ model })),
 
       this.dispatcher.observe()
-        .selectMany((action) => update({ appState, modelState, action }))
+        .selectMany((action) => update({ appState, modelState, action })),
+
+      run ?
+        run({ appState, modelState, dispatch, dispatcher }) :
+        Rx.Observable.empty()
     ).subscribe();
   };
 

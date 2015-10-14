@@ -6,8 +6,16 @@ export default class Dispatcher {
     this.subject = new Rx.Subject();
   }
 
-  observe() {
-    return this.subject.asObservable();
+  observe(type) {
+    let stream = this.subject.asObservable();
+
+    if (type) {
+      stream = stream
+        .filter((action) => action.type === 'type')
+        .map((action) => action.payload);
+    }
+
+    return stream;
   }
 
   dispatch(type) {
