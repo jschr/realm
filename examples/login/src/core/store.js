@@ -62,9 +62,9 @@ export default function createStore(cursor) {
       .do(() => cursor.set(path, fn(cursor.get(path), data)))
   );
 
-  const fork = (...path) => (
+  const select = (...path) => (
     createStore(cursor.select(...path))
   );
 
-  return { observe, get, set, push, unshift, splice, concat, merge, deepMerge, update, fork };
+  return { observe, get, set, push, unshift, splice, concat, merge, deepMerge, update, select };
 }

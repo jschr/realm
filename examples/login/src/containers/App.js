@@ -22,7 +22,7 @@ export const update = ({ modelState, action }) => (
     login: Rx.Observable.just(action.payload)
       .selectMany((payload) =>
         Login.update({
-          modelState: modelState.fork('login'),
+          modelState: modelState.select('login'),
           // TODO: payload.action a better name?
           action: payload.forward
         })

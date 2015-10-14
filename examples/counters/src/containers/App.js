@@ -24,7 +24,7 @@ const update = ({ modelState, action }) => (
     counters: Rx.Observable.just(action.payload)
       .selectMany((payload) =>
         Counter.update({
-          modelState: modelState.fork('counters', payload.i),
+          modelState: modelState.select('counters', payload.i),
           action: payload.forward
         })
       )
