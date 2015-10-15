@@ -12,11 +12,12 @@ export default function createContainer({ init, view, update, run }) {
 
   spec.render = function() {
     const model = this.state.model;
+    const modelState = this.modelState;
     const context = this.context;
     const dispatch = this.dispatch;
     const { children } = this.props;
 
-    return view({ model, context, dispatch }, ...children);
+    return view({ model, context, dispatch, modelState }, ...children);
   };
 
   spec.componentWillMount = function() {
@@ -25,6 +26,7 @@ export default function createContainer({ init, view, update, run }) {
     const dispatch = ::dispatcher.dispatch;
 
     this.dispatch = dispatch;
+    this.modelState = modelState;
 
     this.subscription = Rx.Observable.merge(
       Rx.Observable.just(init())
@@ -46,6 +48,7 @@ export default function createContainer({ init, view, update, run }) {
     this.subscription.dispose();
 
     this.dispatch = null;
+    this.modelState = null;
     this.subscription = null;
   };
 

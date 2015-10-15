@@ -25,12 +25,12 @@ const containerStyle = {
 const update = () => Rx.Observable.empty();
 
 
-const view = () => (
+const view = ({ modelState }) => (
   Section.view({},
-    Section.view({ style: containerStyle }, Pong()),
-    Section.view({ style: containerStyle }, Pong()),
-    Section.view({ style: containerStyle }, Pong()),
-    Section.view({ style: containerStyle }, Pong()))
+    Section.view({ style: containerStyle }, Pong({ modelState: modelState.select('pong1') })),
+    Section.view({ style: containerStyle }, Pong({ modelState: modelState.select('pong2') })),
+    Section.view({ style: containerStyle }, Pong({ modelState: modelState.select('pong3') })),
+    Section.view({ style: containerStyle }, Pong({ modelState: modelState.select('pong4') })))
 );
 
 

@@ -5,51 +5,66 @@ export default function createStore(cursor) {
   if (!cursor) {
     const tree = new Baobab();
     cursor = tree.select();
+    // TODO: remove
     window.cursor = cursor;
   }
 
-  const observe = (...path) => {
-    const source = cursor.select(path);
-    // console.log(path);
-    // const watcher = cursor.watch(path);
+  const observe = (...path) => (
+    Rx.Observable.create((observer) => {
+      const source = cursor.select(path);
+      source.on('update', () =>
+        observer.onNext(source.get())
+      );
+    })
+  );
 
-    return Rx.Observable.create((observer) => {
-      source.on('update', () => observer.onNext(source.get()));
-      // cursor.on('update', () => observer.onNext(watcher.get()));
-    });
-  };
+  const get = (...path) => () => (
+    Rx.Observable.just(cursor.get(path))
+  );
 
-  const set = (...path) => {
-    const setter = (data) => {
-      return Rx.Observable.just(data)
-        .do(() => cursor.set(path, data));
-    };
+  const set = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.set(path, data))
+  );
 
-    setter.to = (data) => () => setter(data);
+  const push = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.push(path, data))
+  );
 
-    return setter;
-  };
+  const unshift = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.unshift(path, data))
+  );
 
-  const merge = (...path) => (data) => {
-    // TODO: can cursor.merge cause an error? If so handle it.
-    cursor.merge(path, data);
+  const splice = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.splice(path, data))
+  );
 
-    return Rx.Observable.just(data);
-  };
+  const concat = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.concat(path, data))
+  );
 
-  const get = (...path) => () => {
-    return Rx.Observable.just(cursor.get(path));
-  };
+  const merge = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.merge(path, data))
+  );
 
-  const fork = (...path) => (initialData) => {
-    const forked = cursor.select(...path);
+  const deepMerge = (...path) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.deepMerge(path, data))
+  );
 
-    if (initialData !== undefined) {
-      forked.set(initialData);
-    }
+  const update = (path, fn) => (data) => (
+    Rx.Observable.just(data)
+      .do(() => cursor.set(path, fn(cursor.get(path), data)))
+  );
 
-    return createStore(forked);
-  };
+  const select = (...path) => (
+    createStore(cursor.select(...path))
+  );
 
-  return { observe, set, get, merge, fork };
+  return { observe, get, set, push, unshift, splice, concat, merge, deepMerge, update, select };
 }

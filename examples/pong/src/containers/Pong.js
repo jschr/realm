@@ -29,6 +29,30 @@ const onKeyboard = Rx.Observable.create((observer) => {
 });
 
 
+const playerOneMoveRight =
+  onKeyboard.filter(({ code }) => code === 39)
+    .map((x) => x.pressed)
+    .distinctUntilChanged();
+
+
+const playerOneMoveLeft =
+  onKeyboard.filter(({ code }) => code === 37)
+    .map((x) => x.pressed)
+    .distinctUntilChanged();
+
+
+const playerTwoMoveRight =
+  onKeyboard.filter(({ code }) => code === 68)
+    .map((x) => x.pressed)
+    .distinctUntilChanged();
+
+
+const playerTwoMoveLeft =
+  onKeyboard.filter(({ code }) => code === 65)
+    .map((x) => x.pressed)
+    .distinctUntilChanged();
+
+
 const init = () => ({
   playerOneScore: Score.init(0),
 
@@ -42,26 +66,30 @@ const init = () => ({
 });
 
 
-const actions = () => ({
-  playerOneMoveRight: onKeyboard.filter(({ code }) => code === 39)
-    .map((x) => x.pressed)
-    .distinctUntilChanged(),
+const view = ({ model = init() }) => (
+  Surface.view({},
+    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) - (HEIGHT / 4) } },
+      Score.view({ model: model.playerTwoScore })),
 
-  playerOneMoveLeft: onKeyboard.filter(({ code }) => code === 37)
-    .map((x) => x.pressed)
-    .distinctUntilChanged(),
+    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) + (HEIGHT / 4) } },
+      Score.view({ model: model.playerOneScore })),
 
-  playerTwoMoveRight: onKeyboard.filter(({ code }) => code === 68)
-    .map((x) => x.pressed)
-    .distinctUntilChanged(),
+    Divider.view({}),
 
-  playerTwoMoveLeft: onKeyboard.filter(({ code }) => code === 65)
-    .map((x) => x.pressed)
-    .distinctUntilChanged()
-});
+    Court.view({}),
+
+    Ball.view({ model: model.ball }),
+
+    Paddle.view({ model: model.paddleTop }),
+
+    Paddle.view({ model: model.paddleBottom }))
+);
 
 
-const update = ({ modelState, playerOneMoveRight, playerOneMoveLeft, playerTwoMoveRight, playerTwoMoveLeft }) => (
+const update = () => Rx.Observable.empty();
+
+
+const run = ({ modelState }) => (
   Rx.Observable.merge(
     // move paddle bottom right
     Rx.Observable.combineLatest(
@@ -253,24 +281,4 @@ const update = ({ modelState, playerOneMoveRight, playerOneMoveLeft, playerTwoMo
 );
 
 
-const view = ({ model = init() }) => (
-  Surface.view({},
-    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) - (HEIGHT / 4) } },
-      Score.view({ model: model.playerTwoScore })),
-
-    Layer.view({ model: { x: (WIDTH / 2), y: (HEIGHT / 2) - (SCORE_SIZE / 2) + (HEIGHT / 4) } },
-      Score.view({ model: model.playerOneScore })),
-
-    Divider.view({}),
-
-    Court.view({}),
-
-    Ball.view({ model: model.ball }),
-
-    Paddle.view({ model: model.paddleTop }),
-
-    Paddle.view({ model: model.paddleBottom }))
-);
-
-
-export default createContainer({ init, actions, update, view });
+export default createContainer({ init, update, view, run });

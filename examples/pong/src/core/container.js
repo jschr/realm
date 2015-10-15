@@ -1,15 +1,10 @@
 import React from 'react';
 import Rx from 'rx';
-import merge from 'lodash.merge';
-import isPlainObject from 'lodash.isplainobject';
-import uniqueId from 'lodash.uniqueid';
 
-export default function createContainer({ init, view, actions, update }) {
+import Dispatcher from './dispatcher';
+
+export default function createContainer({ init, view, update, run }) {
   const spec = {};
-
-  spec.contextTypes = {
-    appState: React.PropTypes.object
-  };
 
   spec.getInitialState = function() {
     return init ? { model: init() } : {};
@@ -17,41 +12,43 @@ export default function createContainer({ init, view, actions, update }) {
 
   spec.render = function() {
     const model = this.state.model;
-    const { children } = this.props;
+    const modelState = this.modelState;
     const context = this.context;
+    const dispatch = this.dispatch;
+    const { children } = this.props;
 
-    return view({ model, context, ...this.actions }, ...children);
+    return view({ model, context, dispatch, modelState }, ...children);
   };
 
   spec.componentWillMount = function() {
-    const appState = this.context.appState;
-    const initialModel = init();
-    const modelState = appState.fork('__models__', uniqueId('m_'))(initialModel);
+    const modelState = this.props.modelState;
+    const dispatcher = new Dispatcher();
+    const dispatch = ::dispatcher.dispatch;
 
-    const setModel = (model) => {
-      if (isPlainObject(model)) {
-        this.setState({ model: merge({}, this.state.model, model) });
-      } else {
-        this.setState({ model });
-      }
-    };
-
+    this.dispatch = dispatch;
     this.modelState = modelState;
-    this.actions = actions();
-    this.update = update({ appState, modelState, ...this.actions });
 
     this.subscription = Rx.Observable.merge(
-      this.modelState.observe().do(setModel),
-      this.update
-    ).subscribe();
+      Rx.Observable.just(init())
+        .selectMany(modelState.set())
+        .selectMany(modelState.observe())
+        .do((model) => this.setState({ model })),
+
+      dispatcher.observe()
+        .selectMany((action) => update({ modelState, action })),
+
+      run ?
+        run({ modelState, dispatch, dispatcher }) :
+        Rx.Observable.empty()
+    )
+      .subscribe();
   };
 
   spec.componentWillUnmount = function() {
     this.subscription.dispose();
 
+    this.dispatch = null;
     this.modelState = null;
-    this.actions = null;
-    this.update = null;
     this.subscription = null;
   };
 
