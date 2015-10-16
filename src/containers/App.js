@@ -10,16 +10,13 @@ const init = () => ({
 });
 
 
-const actions = () => ({});
+const update = () => (Rx.Observable.empty());
 
 
-const view = ({ model = init() }) => (
+const view = ({ model }) => (
   Section.view({},
     Text.view({ model: model.welcomeText }))
 );
 
 
-const update = () => (Rx.Observable.empty());
-
-
-export default createContainer({ init, view, actions, update });
+export default createContainer({ init, view, update });

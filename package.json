@@ -8,6 +8,7 @@
     "start-login-example": "NODE_ENV=development node examples/login/server.js",
     "start-pong-example": "NODE_ENV=development node examples/pong/server.js",
     "start-counters2-example": "NODE_ENV=development node examples/counters2/server.js",
+    "start-dragndrop-example": "NODE_ENV=development node examples/dragndrop/server.js",
     "build": "NODE_ENV=production webpack -p",
     "build-examples": "NODE_ENV=production webpack -p --config examples/counters/webpack.config.js"
   },
