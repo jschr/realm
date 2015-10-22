@@ -11,34 +11,33 @@ export default function createContainer({ init, view, update, run }) {
   };
 
   spec.render = function() {
-    const model = this.state.model;
-    const modelState = this.modelState;
+    const { model, children } = this.props;
     const context = this.context;
     const dispatch = this.dispatch;
-    const { children } = this.props;
 
-    return view({ model, context, dispatch, modelState }, ...children);
+    return view({ model, context, dispatch }, ...children);
   };
 
   spec.componentWillMount = function() {
-    const modelState = this.props.modelState;
+    const model = this.props.model;
     const dispatcher = new Dispatcher();
     const dispatch = ::dispatcher.dispatch;
 
     this.dispatch = dispatch;
-    this.modelState = modelState;
 
     this.subscription = Rx.Observable.merge(
       Rx.Observable.just(init())
-        .selectMany(modelState.set())
-        .selectMany(modelState.observe())
-        .do((model) => this.setState({ model })),
+        .selectMany(model.set())
+        .selectMany(model.observe())
+        // .do((model) => this.setState({ model })),
+        // this will bypass shouldComponentUpdate, which is currently not used
+        .do(() => this.forceUpdate()),
 
       dispatcher.observe()
-        .selectMany((action) => update({ modelState, action })),
+        .selectMany((action) => update({ model, action })),
 
       run ?
-        run({ modelState, dispatch, dispatcher }) :
+        run({ model, dispatch, dispatcher }) :
         Rx.Observable.empty()
     )
       .subscribe();
@@ -48,7 +47,7 @@ export default function createContainer({ init, view, update, run }) {
     this.subscription.dispose();
 
     this.dispatch = null;
-    this.modelState = null;
+    this.model = null;
     this.subscription = null;
   };
 

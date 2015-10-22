@@ -9,22 +9,24 @@ import * as Counter from '../components/Counter';
 
 
 const init = () => ({
-  counters: [ Counter.init(0) ]
+  counters: [ Counter.init(0) ],
+  addBtn: Button.init(),
+  removeBtn: Button.init()
 });
 
 
-const update = ({ modelState, action }) => (
+const update = ({ model, action }) => (
   Rx.Observable.case(() => action.type, {
     add: Rx.Observable.just(Counter.init(0))
-      .selectMany(modelState.push('counters')),
+      .selectMany(model.push('counters')),
 
     remove: Rx.Observable.just([0, 1])
-      .selectMany(modelState.splice('counters')),
+      .selectMany(model.splice('counters')),
 
     counters: Rx.Observable.just(action.payload)
       .selectMany((payload) =>
         Counter.update({
-          modelState: modelState.select('counters', payload.i),
+          model: model.select('counters', payload.i),
           action: payload.forward
         })
       )
@@ -34,19 +36,24 @@ const update = ({ modelState, action }) => (
 
 const view = ({ model, dispatch }) => (
   Section.view({},
-    Button.view({ onClick: dispatch('add') }, Text.view({ model: 'Add' })),
-    Button.view({ onClick: dispatch('remove') }, Text.view({ model: 'Remove' })),
+    Button.view({ model: model.select('addBtn'), dispatch: forward(dispatch, 'add') },
+      Text.view({ model: 'Add' })),
+    Button.view({ model: model.select('removeBtn'), dispatch: forward(dispatch, 'remove') },
+      Text.view({ model: 'Remove' })),
 
-    ...model.counters.map((counter, i) =>
-      Counter.view({ model: counter, dispatch: forward(dispatch, 'counters', { i }) })
+    ...model.get('counters').map((v, i) =>
+      Counter.view({
+        model: model.select('counters', i),
+        dispatch: forward(dispatch, 'counters', { i })
+      })
     ))
 );
 
 
 const run = () => Rx.Observable.empty();
-// const run = ({ modelState, dispatch }) => (
+// const run = ({ model, dispatch }) => (
 //   Rx.Observable.interval(1000)
-//     .selectMany(modelState.get('counters'))
+//     .selectMany(model.get('counters'))
 //     .map((counters) => counters.length)
 //     .selectMany((length) => Rx.Observable.from({ length }, (v, i) => i))
 //     .do((i) => forward(dispatch, 'counters', { i })('increment')())

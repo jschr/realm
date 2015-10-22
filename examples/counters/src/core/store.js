@@ -9,6 +9,18 @@ export default function createStore(cursor) {
     window.cursor = cursor;
   }
 
+  // sync methods
+
+  const get = (...path) => (
+    cursor.get(path)
+  );
+
+  const select = (...path) => (
+    createStore(cursor.select(...path))
+  );
+
+  // async stream methods
+
   const observe = (...path) => (
     Rx.Observable.create((observer) => {
       const source = cursor.select(path);
@@ -16,10 +28,6 @@ export default function createStore(cursor) {
         observer.onNext(source.get())
       );
     })
-  );
-
-  const get = (...path) => () => (
-    Rx.Observable.just(cursor.get(path))
   );
 
   const set = (...path) => (data) => (
@@ -60,10 +68,6 @@ export default function createStore(cursor) {
   const update = (path, fn) => (data) => (
     Rx.Observable.just(data)
       .do(() => cursor.set(path, fn(cursor.get(path), data)))
-  );
-
-  const select = (...path) => (
-    createStore(cursor.select(...path))
   );
 
   return { observe, get, set, push, unshift, splice, concat, merge, deepMerge, update, select };

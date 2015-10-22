@@ -6,6 +6,9 @@ export const init = (disabled = false) => ({
 });
 
 
-export const view = ({ model = init(), style, onClick }, ...children) => (
-  React.DOM.button({ disabled: model.disabled, style, onClick }, ...children)
+export const view = ({ model, dispatch }, ...children) => (
+  React.DOM.button({
+    disabled: model.get('disabled'),
+    onClick: dispatch('click')
+  }, ...children)
 );

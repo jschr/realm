@@ -8,6 +8,6 @@ const selector = document.currentScript.getAttribute('data-container');
 const appState = createStore();
 
 ReactDOM.render(
-  App({ modelState: appState }),
+  App({ model: appState }),
   document.querySelector(selector)
 );
